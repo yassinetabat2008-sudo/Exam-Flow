@@ -132,45 +132,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.25);
         }
-        .simulation-bar {
-            margin-top: 40px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 14px;
-        }
-        .simulation-title {
-            color: #fcd34d;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        .sim-btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .sim-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .sim-accept {
-            background: rgba(74, 222, 128, 0.15);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            color: #4ade80;
-        }
-        .sim-accept:hover { background: rgba(74, 222, 128, 0.3); }
-        .sim-reject {
-            background: rgba(248, 113, 113, 0.15);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            color: #f87171;
-        }
-        .sim-reject:hover { background: rgba(248, 113, 113, 0.3); }
+
     </style>
 </head>
 <body>
@@ -230,15 +192,7 @@
             <a href="index.html" class="btn">← Back Home</a>
         </div>
 
-        <div class="simulation-bar">
-            <div class="simulation-title">⚡ Simulation Controls (Mock Admin Decision)</div>
-            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px;">Toggle student status decision to test the dashboard cards:</p>
-            <div class="sim-btn-group">
-                <button onclick="setSimStatus('accepted')" class="sim-btn sim-accept">Set Accepted</button>
-                <button onclick="setSimStatus('rejected')" class="sim-btn sim-reject">Set Rejected</button>
-                <button onclick="setSimStatus('pending')" class="sim-btn">Reset to Pending</button>
-            </div>
-        </div>
+
     </div>
 
     <script>
@@ -312,15 +266,7 @@
             }
         }
 
-        function setSimStatus(newStatus) {
-            let students = JSON.parse(localStorage.getItem('students') || '[]');
-            const studentIdx = students.findIndex(s => s.student_id === studentId);
-            if (studentIdx !== -1) {
-                students[studentIdx].status = newStatus;
-                localStorage.setItem('students', JSON.stringify(students));
-                loadDashboard();
-            }
-        }
+
 
         loadDashboard();
     </script>

@@ -302,10 +302,13 @@
 
                 let subsHtml = '';
                 q.sub_questions.forEach((sub, sIndex) => {
+                    const imgHtml = sub.image ? `<div style="margin: 12px 0;"><img src="${sub.image}" style="max-width:100%; max-height:280px; border-radius:8px; border:1px solid rgba(255,255,255,0.12);"></div>` : '';
+                    
                     if (sub.type === 'qcm') {
                         subsHtml += `
                         <div class="sub-question">
                             <div class="sub-question-title"><b>(${String.fromCharCode(97 + sIndex)})</b> ${sub.prompt} (Points: ${sub.points})</div>
+                            ${imgHtml}
                             <div class="choices-grid">
                                 <div class="choice-option" onclick="selectRadio('choice_${qIndex}_${sIndex}_A')">
                                     <input type="radio" id="choice_${qIndex}_${sIndex}_A" name="answer_${qIndex}_${sIndex}" value="A" required>
@@ -329,6 +332,7 @@
                         subsHtml += `
                         <div class="sub-question">
                             <div class="sub-question-title"><b>(${String.fromCharCode(97 + sIndex)})</b> ${sub.prompt} (Points: ${sub.points})</div>
+                            ${imgHtml}
                             <textarea id="answer_${qIndex}_${sIndex}" placeholder="Write your answer..." required></textarea>
                         </div>`;
                     }

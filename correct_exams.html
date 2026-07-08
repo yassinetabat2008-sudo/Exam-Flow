@@ -145,44 +145,46 @@
 
         // Mock Submissions Bootstrap if nothing exists
         function bootstrapMockSubmissions() {
-            // Check if there is any student in students list
-            let students = JSON.parse(localStorage.getItem('students') || '[]');
-            if (students.length === 0) {
-                // Register a mock student
-                const mockStudent = {
-                    student_id: "std_mock",
-                    name: "Adil Test",
-                    age: "16",
-                    phone: "+212 666 666 666",
-                    gender: "Male",
-                    province: "Rabat",
-                    school: "High School",
-                    school_type: "Public",
-                    regional: "16.50",
-                    total: "17.00",
-                    status: "pending"
-                };
-                students.push(mockStudent);
-                localStorage.setItem('students', JSON.stringify(students));
-                
-                // Add mock physics submission
-                const mockSubmission = {
-                    physics: {
-                        answers: {
-                            answer_1_1: "B",
-                            answer_1_2: "speed is the rate of change of distance with respect to time"
-                        },
-                        auto_results: {
-                            answer_1_1: { correct: true, earned: 5.0 },
-                            answer_1_2: { correct: true, earned: 15.0 }
-                        },
-                        grade: 20.0,
-                        submitted_at: new Date().toISOString()
-                    }
-                };
-                localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
-                localStorage.setItem('exam_status_std_mock', 'submitted');
+            if (localStorage.getItem('db_bootstrapped') === 'true') {
+                return;
             }
+            localStorage.setItem('db_bootstrapped', 'true');
+
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            // Register a mock student
+            const mockStudent = {
+                student_id: "std_mock",
+                name: "Adil Test",
+                age: "16",
+                phone: "+212 666 666 666",
+                gender: "Male",
+                province: "Rabat",
+                school: "High School",
+                school_type: "Public",
+                regional: "16.50",
+                total: "17.00",
+                status: "pending"
+            };
+            students.push(mockStudent);
+            localStorage.setItem('students', JSON.stringify(students));
+            
+            // Add mock physics submission
+            const mockSubmission = {
+                physics: {
+                    answers: {
+                        answer_1_1: "B",
+                        answer_1_2: "speed is the rate of change of distance with respect to time"
+                    },
+                    auto_results: {
+                        answer_1_1: { correct: true, earned: 5.0 },
+                        answer_1_2: { correct: true, earned: 15.0 }
+                    },
+                    grade: 20.0,
+                    submitted_at: new Date().toISOString()
+                }
+            };
+            localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
+            localStorage.setItem('exam_status_std_mock', 'submitted');
         }
 
         bootstrapMockSubmissions();

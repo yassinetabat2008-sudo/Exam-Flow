@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Acceptance Test Portal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -299,34 +300,37 @@
 
         // Mock Submissions Bootstrap if nothing exists
         function bootstrapMockSubmissions() {
-            let students = JSON.parse(localStorage.getItem('students') || '[]');
-            if (students.length === 0) {
-                const mockStudent = {
-                    student_id: "std_mock",
-                    name: "Adil Test",
-                    age: "16",
-                    phone: "+212 666 666 666",
-                    gender: "Male",
-                    province: "Rabat",
-                    school: "High School",
-                    school_type: "Public",
-                    regional: "16.50",
-                    total: "17.00",
-                    status: "pending"
-                };
-                students.push(mockStudent);
-                localStorage.setItem('students', JSON.stringify(students));
-                
-                const mockSubmission = {
-                    physics: {
-                        answers: { answer_1_1: "B", answer_1_2: "speed is distance over time" },
-                        auto_results: { answer_1_1: { correct: true, earned: 5.0 }, answer_1_2: { correct: true, earned: 15.0 } },
-                        grade: 20.0,
-                        submitted_at: new Date().toISOString()
-                    }
-                };
-                localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
+            if (localStorage.getItem('db_bootstrapped') === 'true') {
+                return;
             }
+            localStorage.setItem('db_bootstrapped', 'true');
+
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            const mockStudent = {
+                student_id: "std_mock",
+                name: "Adil Test",
+                age: "16",
+                phone: "+212 666 666 666",
+                gender: "Male",
+                province: "Rabat",
+                school: "High School",
+                school_type: "Public",
+                regional: "16.50",
+                total: "17.00",
+                status: "pending"
+            };
+            students.push(mockStudent);
+            localStorage.setItem('students', JSON.stringify(students));
+            
+            const mockSubmission = {
+                physics: {
+                    answers: { answer_1_1: "B", answer_1_2: "speed is distance over time" },
+                    auto_results: { answer_1_1: { correct: true, earned: 5.0 }, answer_1_2: { correct: true, earned: 15.0 } },
+                    grade: 20.0,
+                    submitted_at: new Date().toISOString()
+                }
+            };
+            localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
         }
 
         bootstrapMockSubmissions();
@@ -386,15 +390,16 @@
                 const actionsHtml = `
                     <button onclick="decideStudent('${student.student_id}', 'accepted')" class="action-accept">Accept</button>
                     <button onclick="decideStudent('${student.student_id}', 'rejected')" class="action-reject" style="margin-left:5px;">Reject</button>
+                    <button onclick="deleteStudent('${student.student_id}')" class="action-reject" style="margin-left:5px; background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.3);">Delete</button>
                 `;
 
-                // PDF report mocks
+                // PDF report exports
                 let pdfLinks = '';
                 if (physicsGrade !== null) {
-                    pdfLinks += `<a href="#" onclick="mockDownloadPdf('${student.student_id}', 'physics')" class="btn-pdf">Physics PDF</a>`;
+                    pdfLinks += `<a href="#" onclick="downloadPdfReport('${student.student_id}', 'physics')" class="btn-pdf">Physics PDF</a>`;
                 }
                 if (mathGrade !== null) {
-                    pdfLinks += `<a href="#" onclick="mockDownloadPdf('${student.student_id}', 'math')" class="btn-pdf">Math PDF</a>`;
+                    pdfLinks += `<a href="#" onclick="downloadPdfReport('${student.student_id}', 'math')" class="btn-pdf">Math PDF</a>`;
                 }
 
                 tr.innerHTML = `
@@ -433,7 +438,25 @@
             }
         }
 
-        function mockDownloadPdf(studentId, subject) {
+        function deleteStudent(studentId) {
+            if (confirm("Are you sure you want to delete this candidate permanently?")) {
+                let students = JSON.parse(localStorage.getItem('students') || '[]');
+                students = students.filter(s => s.student_id !== studentId);
+                localStorage.setItem('students', JSON.stringify(students));
+
+                // Clean up their submissions
+                localStorage.removeItem('submissions_' + studentId);
+                localStorage.removeItem('exam_status_' + studentId);
+
+                renderCandidates();
+                alert("Candidate deleted successfully!");
+            }
+        }
+
+        function downloadPdfReport(studentId, subject) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
             const students = JSON.parse(localStorage.getItem('students') || '[]');
             const student = students.find(s => s.student_id === studentId);
             const submissions = JSON.parse(localStorage.getItem('submissions_' + studentId) || '{}');
@@ -444,30 +467,83 @@
                 return;
             }
 
-            // Generate a simple plain text report as a mockup file download!
-            const textContent = `
-========================================
-EXAM EVALUATION REPORT - ${subject.toUpperCase()}
-========================================
-Student Name: ${student.name}
-School Type:  ${student.school_type}
-Regional:     ${student.regional}
-Total:        ${student.total}
-========================================
-GRADE:        ${sub.grade} / 20
-Teacher Comments: "${sub.teacher_comments || 'No comments'}"
-========================================
-`;
+            // Header Background Rect
+            doc.setFillColor(15, 23, 42); // slate-900 color
+            doc.rect(0, 0, 210, 35, 'F');
 
-            const blob = new Blob([textContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${student.name.replace(/\s+/g, '_')}_${subject}_corrected_report.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Header Title
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(20);
+            doc.text("ACCEPTANCE PORTAL EVALUATION", 15, 20);
+
+            // Document details
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(140, 213, 255);
+            doc.text("OFFICIAL REPORT CARD", 15, 27);
+
+            // Content colors
+            doc.setTextColor(50, 50, 50);
+            doc.setFontSize(12);
+
+            // Left colored bar for details
+            doc.setFillColor(30, 58, 95); // dark blue
+            doc.rect(15, 45, 3, 45, 'F');
+
+            // Student Information section
+            doc.setFont("helvetica", "bold");
+            doc.text("Candidate Details", 23, 50);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Name: " + student.name, 23, 58);
+            doc.text("Age: " + student.age + "   |   Gender: " + student.gender, 23, 64);
+            doc.text("School: " + student.school + " (" + student.school_type + ")", 23, 70);
+            doc.text("Province: " + student.province, 23, 76);
+            doc.text("Parent Phone: " + student.phone, 23, 82);
+
+            // Score details
+            doc.setFillColor(76, 175, 80); // green bar
+            doc.rect(115, 45, 3, 45, 'F');
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Grades & Score Matrix", 123, 50);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Note Régional 4ème: " + student.regional + " / 20", 123, 58);
+            doc.text("Note Totale 4ème:   " + student.total + " / 20", 123, 64);
+            doc.setFont("helvetica", "bold");
+            doc.text("Exam Grade (" + subject.toUpperCase() + "): " + sub.grade + " / 20", 123, 74);
+
+            // Horizontal Separator
+            doc.setDrawColor(200, 200, 200);
+            doc.line(15, 98, 195, 98);
+
+            // Left colored card for Teacher Feedback comments
+            doc.setFillColor(139, 213, 255); // light blue
+            doc.rect(15, 108, 6, 35, 'F');
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Evaluation Feedback & Comments", 26, 114);
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(11);
+            
+            // Text wrap comments
+            const commentsText = sub.teacher_comments || "No remarks entered by the evaluator.";
+            const splitComments = doc.splitTextToSize(commentsText, 160);
+            doc.text(splitComments, 26, 124);
+
+            // Signature area
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Generated on: " + new Date().toLocaleString(), 15, 170);
+            doc.text("Acceptance Administration Officer", 130, 170);
+            doc.line(130, 165, 190, 165);
+
+            // Save the PDF
+            doc.save(student.name.replace(/\s+/g, '_') + "_" + subject + "_corrected_report.pdf");
         }
 
         function applyFilters() {

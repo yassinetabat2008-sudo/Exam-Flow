@@ -120,33 +120,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.25);
         }
-        .simulation-bar {
-            margin-top: 40px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 14px;
-        }
-        .simulation-title {
-            color: #fcd34d;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        .sim-btn {
-            padding: 8px 16px;
-            background: rgba(252, 211, 77, 0.15);
-            border: 1px solid rgba(252, 211, 77, 0.3);
-            color: #fcd34d;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .sim-btn:hover {
-            background: rgba(252, 211, 77, 0.3);
-        }
+
     </style>
 </head>
 <body>
@@ -191,11 +165,7 @@
             <button onclick="leaveWaitingRoom()" class="btn">Leave Waiting Room</button>
         </div>
 
-        <div class="simulation-bar">
-            <div class="simulation-title">⚡ Simulation Controls (Mock Teacher Action)</div>
-            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px;">You can simulate the teacher starting a Physics exam right now:</p>
-            <button onclick="simulateTeacherStart()" class="sim-btn">Launch Physics Exam</button>
-        </div>
+
     </div>
 
     <script>
@@ -249,12 +219,7 @@
             window.location.href = "index.html";
         }
 
-        function simulateTeacherStart() {
-            localStorage.setItem('active_exam', 'physics');
-            localStorage.setItem('exam_started', 'true');
-            checkStatus();
-            alert("Physics Exam Started! The 'Start Exam' button is now visible.");
-        }
+
     </script>
 </body>
 </html>

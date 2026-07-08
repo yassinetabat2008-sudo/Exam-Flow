@@ -74,6 +74,12 @@
             transition: all 0.3s ease;
             font-family: inherit;
         }
+        input[type="file"] {
+            padding: 8px 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
         textarea {
             resize: vertical;
             min-height: 80px;
@@ -265,6 +271,10 @@
                     <label>Points *</label>
                     <input type="number" id="sub_points_${index}" min="1" max="20" value="10" required>
                 </div>
+                <div class="form-group">
+                    <label>Sub-Question Image (Optional)</label>
+                    <input type="file" id="sub_image_${index}" accept="image/*">
+                </div>
             `;
 
             if (type === 'qcm') {
@@ -364,10 +374,12 @@
 
                 let subHtml = '<ol class="sub-questions-ol">';
                 q.sub_questions.forEach(sub => {
+                    const imgHtml = sub.image ? `<br><img src="${sub.image}" style="max-width:200px; border-radius:6px; margin:8px 0; border:1px solid rgba(255,255,255,0.1);">` : '';
+                    
                     if (sub.type === 'qcm') {
                         subHtml += `
                             <li>
-                                <strong>QCM:</strong> ${sub.prompt} <span class="badge-points">(${sub.points} pts)</span>
+                                <strong>QCM:</strong> ${sub.prompt} ${imgHtml} <span class="badge-points">(${sub.points} pts)</span>
                                 <ul style="margin-left:20px; list-style-type:circle;">
                                     <li>A: ${sub.choices.A}</li>
                                     <li>B: ${sub.choices.B}</li>
@@ -380,7 +392,7 @@
                     } else {
                         subHtml += `
                             <li>
-                                <strong>Text:</strong> ${sub.prompt} <span class="badge-points">(${sub.points} pts)</span><br>
+                                <strong>Text:</strong> ${sub.prompt} ${imgHtml} <span class="badge-points">(${sub.points} pts)</span><br>
                                 <strong>Expected Answer:</strong> "${sub.correct}"
                             </li>
                         `;
@@ -414,6 +426,15 @@
             }
         }
 
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsDataURL(file);
+            });
+        }
+
         function addQuestion(event) {
             event.preventDefault();
             
@@ -423,8 +444,7 @@
                 return;
             }
 
-            const subQuestionsData = [];
-            let valid = true;
+            const subQuestionsPromises = [];
 
             subQuestionsList.forEach((sub, idx) => {
                 if (sub === null) return;
@@ -432,51 +452,68 @@
                 const prompt = document.getElementById('sub_prompt_' + idx).value;
                 const points = parseFloat(document.getElementById('sub_points_' + idx).value);
                 const correct = document.getElementById('sub_correct_' + idx).value;
+                const fileInput = document.getElementById('sub_image_' + idx);
+                const file = fileInput.files[0];
 
-                if (sub.type === 'qcm') {
-                    const choices = {
-                        A: document.getElementById('sub_choice_A_' + idx).value,
-                        B: document.getElementById('sub_choice_B_' + idx).value,
-                        C: document.getElementById('sub_choice_C_' + idx).value,
-                        D: document.getElementById('sub_choice_D_' + idx).value
-                    };
-                    subQuestionsData.push({
-                        type: 'qcm',
-                        prompt: prompt,
-                        points: points,
-                        choices: choices,
-                        correct: correct
-                    });
-                } else {
-                    subQuestionsData.push({
-                        type: 'text',
-                        prompt: prompt,
-                        points: points,
-                        correct: correct
-                    });
+                let imgPromise = Promise.resolve(null);
+                if (file) {
+                    imgPromise = readFileAsDataURL(file);
                 }
+
+                const subPromise = imgPromise.then(imgDataUrl => {
+                    if (sub.type === 'qcm') {
+                        const choices = {
+                            A: document.getElementById('sub_choice_A_' + idx).value,
+                            B: document.getElementById('sub_choice_B_' + idx).value,
+                            C: document.getElementById('sub_choice_C_' + idx).value,
+                            D: document.getElementById('sub_choice_D_' + idx).value
+                        };
+                        return {
+                            type: 'qcm',
+                            prompt: prompt,
+                            points: points,
+                            choices: choices,
+                            correct: correct,
+                            image: imgDataUrl
+                        };
+                    } else {
+                        return {
+                            type: 'text',
+                            prompt: prompt,
+                            points: points,
+                            correct: correct,
+                            image: imgDataUrl
+                        };
+                    }
+                });
+
+                subQuestionsPromises.push(subPromise);
             });
 
-            const newQuestion = {
-                title: document.getElementById('questionTitle').value,
-                desc: document.getElementById('questionDesc').value,
-                sub_questions: subQuestionsData,
-                timestamp: new Date().toISOString()
-            };
+            Promise.all(subQuestionsPromises).then(subQuestionsData => {
+                const newQuestion = {
+                    title: document.getElementById('questionTitle').value,
+                    desc: document.getElementById('questionDesc').value,
+                    sub_questions: subQuestionsData,
+                    timestamp: new Date().toISOString()
+                };
 
-            const key = 'questions_' + subject;
-            let questions = JSON.parse(localStorage.getItem(key) || '[]');
-            questions.push(newQuestion);
-            localStorage.setItem(key, JSON.stringify(questions));
+                const key = 'questions_' + subject;
+                let questions = JSON.parse(localStorage.getItem(key) || '[]');
+                questions.push(newQuestion);
+                localStorage.setItem(key, JSON.stringify(questions));
 
-            // Reset form
-            document.getElementById('questionTitle').value = '';
-            document.getElementById('questionDesc').value = '';
-            document.getElementById('subQuestionsContainer').innerHTML = '';
-            subQuestionsList = [];
+                // Reset form
+                document.getElementById('questionTitle').value = '';
+                document.getElementById('questionDesc').value = '';
+                document.getElementById('subQuestionsContainer').innerHTML = '';
+                subQuestionsList = [];
 
-            alert("Question published successfully!");
-            renderQuestions();
+                alert("Question published successfully!");
+                renderQuestions();
+            }).catch(err => {
+                alert("Error reading file: " + err);
+            });
         }
 
         // Initialize view

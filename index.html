@@ -91,20 +91,7 @@
             font-size: 0.9rem;
             font-weight: 400;
         }
-        .mock-reset-btn {
-            margin-top: 20px;
-            background: rgba(255, 107, 107, 0.2);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            color: #ff8787;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-        .mock-reset-btn:hover {
-            background: rgba(255, 107, 107, 0.35);
-        }
+
         @media (max-width: 600px) {
             .container { padding: 40px 20px; }
             h1 { font-size: 2rem; }
@@ -136,19 +123,9 @@
                 <div class="role-desc">System administration</div>
             </a>
         </div>
-        
-        <button class="mock-reset-btn" onclick="resetMockDB()">Reset Mock Portal Data</button>
-        
         <div class="footer">
-            School Acceptance Testing System - Static GitHub Pages Version
+            School Acceptance Testing System
         </div>
     </div>
-
-    <script>
-        function resetMockDB() {
-            localStorage.clear();
-            alert("Mock Portal data has been reset to defaults!");
-        }
-    </script>
 </body>
 </html>

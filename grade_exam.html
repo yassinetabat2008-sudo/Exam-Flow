@@ -292,8 +292,11 @@
                     let typeLabel = sub.type === 'qcm' ? 'QCM' : 'Text Answer';
                     let expectedDisplay = sub.type === 'qcm' ? `Choice <strong>${sub.correct}</strong>` : `"${sub.correct}"`;
 
+                    const imgHtml = sub.image ? `<div style="margin: 8px 0;"><img src="${sub.image}" style="max-width:200px; border-radius:6px; border:1px solid rgba(255,255,255,0.1);"></div>` : '';
+
                     card.innerHTML = `
                         <div class="card-header">Question ${qIndex + 1}(${String.fromCharCode(97 + sIndex)}): ${sub.prompt} (${typeLabel} - Points: ${sub.points})</div>
+                        ${imgHtml}
                         <div class="text-label">Student Answer:</div>
                         <div class="student-response">${studentAns}</div>
                         <div class="expected-answer">Expected Answer: ${expectedDisplay}</div>
