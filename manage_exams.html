@@ -195,6 +195,17 @@
         
         <!-- Add Question Form -->
         <div class="form-section">
+            <!-- GitHub Repository Storage Settings -->
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: left;">
+                <strong style="color: #fcd34d; font-size: 0.9rem;">🛠️ GITHUB REPOSITORY STORAGE INTEGRATION</strong>
+                <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-top: 4px; margin-bottom: 12px;">Save uploaded question images directly to your GitHub repository folder (e.g., /uploads).</p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="password" id="ghToken" placeholder="Enter your GitHub Personal Access Token (PAT)" style="flex: 1; padding: 10px 12px; font-size: 0.85rem; margin-bottom: 0;">
+                    <button type="button" onclick="saveGitHubToken()" class="btn btn-action" style="padding: 10px 16px; margin-top: 0; white-space: nowrap;">Save Token</button>
+                </div>
+                <span id="tokenStatus" style="font-size: 0.75rem; color: #8bd5ff; display: block; margin-top: 6px;"></span>
+            </div>
+
             <div class="form-section-title">Create New Question</div>
             <form onsubmit="addQuestion(event)">
                 <div class="form-group">
@@ -426,11 +437,96 @@
             }
         }
 
-        function readFileAsDataURL(file) {
+        function saveGitHubToken() {
+            const token = document.getElementById('ghToken').value.trim();
+            if (token) {
+                localStorage.setItem('github_token', token);
+                document.getElementById('tokenStatus').innerText = "✅ GitHub Integration Active (Token saved in browser)";
+                alert("GitHub Token saved locally in your browser!");
+            } else {
+                localStorage.removeItem('github_token');
+                document.getElementById('tokenStatus').innerText = "";
+                alert("GitHub Integration disabled.");
+            }
+        }
+
+        function compressImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error);
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 600;
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height *= MAX_SIZE / width;
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width *= MAX_SIZE / height;
+                                height = MAX_SIZE;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = () => reject("Image loading error");
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject("File reading error");
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function uploadImageToGitHub(file) {
+            const token = localStorage.getItem('github_token');
+            if (!token) {
+                return compressImage(file);
+            }
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Content = e.target.result.split(',')[1];
+                    const filename = "img_" + Date.now() + "_" + file.name.replace(/\s+/g, '_');
+                    const repo = "yassinetabat2008-sudo/Exam-Flow";
+                    const path = "uploads/" + filename;
+
+                    fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: "Upload exam question image via portal",
+                            content: base64Content,
+                            branch: "main"
+                        })
+                    })
+                    .then(res => {
+                        if (res.status === 201 || res.status === 200) {
+                            return res.json();
+                        } else {
+                            throw new Error("GitHub error status: " + res.statusText);
+                        }
+                    })
+                    .then(data => {
+                        const rawUrl = `https://raw.githubusercontent.com/${repo}/main/${path}`;
+                        resolve(rawUrl);
+                    })
+                    .catch(err => {
+                        console.warn("GitHub upload failed, falling back to base64 compression:", err);
+                        compressImage(file).then(resolve).catch(reject);
+                    });
+                };
+                reader.onerror = () => reject("File reading failed");
                 reader.readAsDataURL(file);
             });
         }
@@ -457,7 +553,7 @@
 
                 let imgPromise = Promise.resolve(null);
                 if (file) {
-                    imgPromise = readFileAsDataURL(file);
+                    imgPromise = uploadImageToGitHub(file);
                 }
 
                 const subPromise = imgPromise.then(imgDataUrl => {
@@ -518,6 +614,13 @@
 
         // Initialize view
         renderQuestions();
+
+        // Load GitHub settings
+        const savedToken = localStorage.getItem('github_token');
+        if (savedToken) {
+            document.getElementById('ghToken').value = savedToken;
+            document.getElementById('tokenStatus').innerText = "✅ GitHub Integration Active (Token saved in browser)";
+        }
     </script>
 </body>
 </html>

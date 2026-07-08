@@ -167,17 +167,28 @@
             };
             students.push(mockStudent);
             localStorage.setItem('students', JSON.stringify(students));
-            
-            // Add mock physics submission
+            // Add mock physics and math submissions
             const mockSubmission = {
                 physics: {
                     answers: {
-                        answer_1_1: "B",
-                        answer_1_2: "speed is the rate of change of distance with respect to time"
+                        answer_0_0: "B",
+                        answer_0_1: "speed is the rate of change of distance with respect to time"
                     },
                     auto_results: {
-                        answer_1_1: { correct: true, earned: 5.0 },
-                        answer_1_2: { correct: true, earned: 15.0 }
+                        answer_0_0: { correct: true, earned: 5.0 },
+                        answer_0_1: { correct: true, earned: 15.0 }
+                    },
+                    grade: 20.0,
+                    submitted_at: new Date().toISOString()
+                },
+                math: {
+                    answers: {
+                        answer_0_0: "B",
+                        answer_0_1: "2x"
+                    },
+                    auto_results: {
+                        answer_0_0: { correct: true, earned: 8.0 },
+                        answer_0_1: { correct: true, earned: 12.0 }
                     },
                     grade: 20.0,
                     submitted_at: new Date().toISOString()

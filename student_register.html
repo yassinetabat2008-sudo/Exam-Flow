@@ -218,6 +218,15 @@
                 <button type="submit" class="btn btn-submit">Submit Registration</button>
                 <a href="index.html" class="btn btn-back">← Back to Role Selection</a>
             </div>
+
+            <!-- ID Login / Status Check -->
+            <div style="margin-top: 35px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 25px; text-align: center;">
+                <label for="check_id" style="color: rgba(255,255,255,0.85); font-weight: 500; font-size: 0.95rem; margin-bottom: 10px; display: block;">Already Registered?</label>
+                <div style="display: flex; gap: 10px; align-items: center; max-width: 500px; margin: 0 auto;">
+                    <input type="text" id="check_id" placeholder="Enter your Student ID (e.g., std_mock)" style="padding: 10px 12px; font-size: 0.9rem;">
+                    <button type="button" onclick="checkStudentStatus()" class="btn btn-submit" style="padding: 10px 20px; white-space: nowrap;">Check Status</button>
+                </div>
+            </div>
         </form>
     </div>
 
@@ -272,10 +281,25 @@
             window.location.href = "waiting_room.html?student_id=" + studentId;
         }
 
-        // Auto-redirect if student session already active
-        const activeStudentId = localStorage.getItem('current_student_id');
-        if (activeStudentId) {
-            window.location.href = "waiting_room.html?student_id=" + activeStudentId;
+        function checkStudentStatus() {
+            const id = document.getElementById('check_id').value.trim();
+            if (!id) {
+                alert("Please enter your Student ID.");
+                return;
+            }
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const studentExists = students.some(s => s.student_id === id);
+            if (studentExists) {
+                localStorage.setItem('current_student_id', id);
+                const status = localStorage.getItem('exam_status_' + id) || 'waiting';
+                if (status === 'waiting' || status === 'started') {
+                    window.location.href = "waiting_room.html?student_id=" + id;
+                } else {
+                    window.location.href = "student_dashboard.html?student_id=" + id;
+                }
+            } else {
+                alert("Student ID not found. (Hint: Use 'std_mock' for testing)");
+            }
         }
     </script>
 </body>

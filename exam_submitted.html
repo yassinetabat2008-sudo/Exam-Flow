@@ -79,11 +79,26 @@
         <p class="status-text">
             Your exam answers have been successfully uploaded. The teacher will correct and grade your submission soon.
         </p>
+        <p style="color: rgba(139, 213, 255, 0.85); font-size: 0.9rem; margin-top: -15px; margin-bottom: 25px;">
+            Redirecting to the waiting room for your next test in <strong id="countdown">3</strong>s...
+        </p>
         
         <div class="buttons">
             <a href="student_dashboard.html" class="btn btn-primary">Go to Dashboard</a>
             <a href="index.html" class="btn">Back Home</a>
         </div>
     </div>
+    <script>
+        let seconds = 3;
+        const interval = setInterval(() => {
+            seconds--;
+            const countEl = document.getElementById('countdown');
+            if (countEl) countEl.innerText = seconds;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                window.location.href = "waiting_room.html";
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
