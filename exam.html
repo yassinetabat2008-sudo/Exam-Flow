@@ -67,6 +67,7 @@
             border-radius: 18px;
             padding: 24px;
             margin-bottom: 30px;
+            text-align: left;
         }
         .question-header {
             font-size: 1.15rem;
@@ -190,59 +191,8 @@
         <h1 id="examTitle">Physics Entrance Examination</h1>
         
         <form id="examForm" onsubmit="submitExam(event)">
-            <!-- Question 1 Card -->
-            <div class="question-card">
-                <div class="question-header">Question 1: Kinematics & Dynamics</div>
-                <div class="question-body">
-                    A particle is moving along a straight coordinate line. Its position vector relative to the origin satisfies the constant acceleration equation. Study the diagram below representing the motion and answer the sub-questions.
-                </div>
-                
-                <!-- Diagram Visual (Inline SVG) -->
-                <div class="diagram-container">
-                    <svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Coordinate Line -->
-                        <line x1="20" y1="70" x2="380" y2="70" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4" />
-                        <polygon points="380,66 390,70 380,74" fill="#cbd5e1" />
-                        <!-- Origin -->
-                        <line x1="80" y1="65" x2="80" y2="75" stroke="#8bd5ff" stroke-width="3" />
-                        <text x="75" y="90" fill="#8bd5ff" font-size="12" font-family="sans-serif">O (0)</text>
-                        <!-- Particle Vector / Arrow -->
-                        <circle cx="220" cy="70" r="8" fill="#4ade80" />
-                        <line x1="220" y1="70" x2="300" y2="70" stroke="#4ade80" stroke-width="3" />
-                        <polygon points="300,65 310,70 300,75" fill="#4ade80" />
-                        <text x="210" y="55" fill="#4ade80" font-size="12" font-family="sans-serif" font-weight="bold">v (t)</text>
-                        <text x="280" y="55" fill="#e2e8f0" font-size="12" font-family="sans-serif">a = const</text>
-                    </svg>
-                </div>
-                
-                <!-- Sub Question 1 (QCM) -->
-                <div class="sub-question">
-                    <div class="sub-question-title"><b>(a)</b> What is the SI unit of acceleration? (Points: 5)</div>
-                    <div class="choices-grid">
-                        <div class="choice-option" onclick="selectRadio('choice_1_A')">
-                            <input type="radio" id="choice_1_A" name="answer_1_1" value="A">
-                            <label class="choice-label" for="choice_1_A"><b>A.</b> m/s</label>
-                        </div>
-                        <div class="choice-option" onclick="selectRadio('choice_1_B')">
-                            <input type="radio" id="choice_1_B" name="answer_1_1" value="B">
-                            <label class="choice-label" for="choice_1_B"><b>B.</b> m/s²</label>
-                        </div>
-                        <div class="choice-option" onclick="selectRadio('choice_1_C')">
-                            <input type="radio" id="choice_1_C" name="answer_1_1" value="C">
-                            <label class="choice-label" for="choice_1_C"><b>C.</b> s</label>
-                        </div>
-                        <div class="choice-option" onclick="selectRadio('choice_1_D')">
-                            <input type="radio" id="choice_1_D" name="answer_1_1" value="D">
-                            <label class="choice-label" for="choice_1_D"><b>D.</b> kg</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sub Question 2 (Text) -->
-                <div class="sub-question">
-                    <div class="sub-question-title"><b>(b)</b> Define speed in your own words. (Points: 15)</div>
-                    <textarea id="answer_1_2" placeholder="Write your definition of speed..." required></textarea>
-                </div>
+            <div id="dynamicQuestionsContainer">
+                <!-- Injected dynamically -->
             </div>
 
             <div class="buttons">
@@ -269,11 +219,132 @@
         const activeSubject = localStorage.getItem('active_exam') || 'physics';
         document.getElementById('examTitle').innerText = activeSubject.toUpperCase() + " Entrance Examination";
 
+        // Load custom questions or fallback to defaults
+        const questionsKey = 'questions_' + activeSubject;
+        let questions = JSON.parse(localStorage.getItem(questionsKey) || '[]');
+        
+        if (questions.length === 0) {
+            // Setup defaults if empty
+            if (activeSubject === 'physics') {
+                questions = [{
+                    title: "Kinematics & Dynamics",
+                    desc: "A particle is moving along a straight coordinate line. Its position vector relative to the origin satisfies the constant acceleration equation. Study the diagram below representing the motion and answer the sub-questions.",
+                    sub_questions: [
+                        {
+                            type: "qcm",
+                            prompt: "What is the SI unit of acceleration?",
+                            points: 5,
+                            choices: { A: "m/s", B: "m/s²", C: "s", D: "kg" },
+                            correct: "B"
+                        },
+                        {
+                            type: "text",
+                            prompt: "Define speed in your own words.",
+                            points: 15,
+                            correct: "distance"
+                        }
+                    ]
+                }];
+            } else {
+                questions = [{
+                    title: "Calculus & Limits",
+                    desc: "Evaluate the mathematical expressions and solve the problems below.",
+                    sub_questions: [
+                        {
+                            type: "qcm",
+                            prompt: "What is the limit of sin(x)/x as x approaches 0?",
+                            points: 8,
+                            choices: { A: "0", B: "1", C: "Infinity", D: "Undefined" },
+                            correct: "B"
+                        },
+                        {
+                            type: "text",
+                            prompt: "What is the derivative of x² with respect to x?",
+                            points: 12,
+                            correct: "2x"
+                        }
+                    ]
+                }];
+            }
+            localStorage.setItem(questionsKey, JSON.stringify(questions));
+        }
+
+        // Render questions dynamically
+        function renderExam() {
+            const qContainer = document.getElementById('dynamicQuestionsContainer');
+            qContainer.innerHTML = '';
+
+            questions.forEach((q, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+
+                let titleHtml = `<div class="question-header">Question ${qIndex + 1}: ${q.title}</div>`;
+                let descHtml = `<div class="question-body">${q.desc}</div>`;
+                
+                // Vector diagram specifically for default physics kinematic question
+                let illustrationHtml = '';
+                if (activeSubject === 'physics' && qIndex === 0 && q.title.includes("Kinematics")) {
+                    illustrationHtml = `
+                    <div class="diagram-container">
+                        <svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="20" y1="70" x2="380" y2="70" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4" />
+                            <polygon points="380,66 390,70 380,74" fill="#cbd5e1" />
+                            <line x1="80" y1="65" x2="80" y2="75" stroke="#8bd5ff" stroke-width="3" />
+                            <text x="75" y="90" fill="#8bd5ff" font-size="12" font-family="sans-serif">O (0)</text>
+                            <circle cx="220" cy="70" r="8" fill="#4ade80" />
+                            <line x1="220" y1="70" x2="300" y2="70" stroke="#4ade80" stroke-width="3" />
+                            <polygon points="300,65 310,70 300,75" fill="#4ade80" />
+                            <text x="210" y="55" fill="#4ade80" font-size="12" font-family="sans-serif" font-weight="bold">v (t)</text>
+                            <text x="280" y="55" fill="#e2e8f0" font-size="12" font-family="sans-serif">a = const</text>
+                        </svg>
+                    </div>`;
+                }
+
+                let subsHtml = '';
+                q.sub_questions.forEach((sub, sIndex) => {
+                    if (sub.type === 'qcm') {
+                        subsHtml += `
+                        <div class="sub-question">
+                            <div class="sub-question-title"><b>(${String.fromCharCode(97 + sIndex)})</b> ${sub.prompt} (Points: ${sub.points})</div>
+                            <div class="choices-grid">
+                                <div class="choice-option" onclick="selectRadio('choice_${qIndex}_${sIndex}_A')">
+                                    <input type="radio" id="choice_${qIndex}_${sIndex}_A" name="answer_${qIndex}_${sIndex}" value="A" required>
+                                    <label class="choice-label" for="choice_${qIndex}_${sIndex}_A"><b>A.</b> ${sub.choices.A}</label>
+                                </div>
+                                <div class="choice-option" onclick="selectRadio('choice_${qIndex}_${sIndex}_B')">
+                                    <input type="radio" id="choice_${qIndex}_${sIndex}_B" name="answer_${qIndex}_${sIndex}" value="B">
+                                    <label class="choice-label" for="choice_${qIndex}_${sIndex}_B"><b>B.</b> ${sub.choices.B}</label>
+                                </div>
+                                <div class="choice-option" onclick="selectRadio('choice_${qIndex}_${sIndex}_C')">
+                                    <input type="radio" id="choice_${qIndex}_${sIndex}_C" name="answer_${qIndex}_${sIndex}" value="C">
+                                    <label class="choice-label" for="choice_${qIndex}_${sIndex}_C"><b>C.</b> ${sub.choices.C}</label>
+                                </div>
+                                <div class="choice-option" onclick="selectRadio('choice_${qIndex}_${sIndex}_D')">
+                                    <input type="radio" id="choice_${qIndex}_${sIndex}_D" name="answer_${qIndex}_${sIndex}" value="D">
+                                    <label class="choice-label" for="choice_${qIndex}_${sIndex}_D"><b>D.</b> ${sub.choices.D}</label>
+                                </div>
+                            </div>
+                        </div>`;
+                    } else {
+                        subsHtml += `
+                        <div class="sub-question">
+                            <div class="sub-question-title"><b>(${String.fromCharCode(97 + sIndex)})</b> ${sub.prompt} (Points: ${sub.points})</div>
+                            <textarea id="answer_${qIndex}_${sIndex}" placeholder="Write your answer..." required></textarea>
+                        </div>`;
+                    }
+                });
+
+                card.innerHTML = titleHtml + descHtml + illustrationHtml + subsHtml;
+                qContainer.appendChild(card);
+            });
+        }
+
+        renderExam();
+
         // Radio option highlighting helper
         function selectRadio(id) {
             document.getElementById(id).checked = true;
             
-            // Highlight container
             const radio = document.getElementById(id);
             const parent = radio.closest('.choices-grid');
             const options = parent.querySelectorAll('.choice-option');
@@ -282,7 +353,8 @@
         }
 
         // Timer countdown
-        let totalSeconds = 30 * 60;
+        const currentDuration = parseInt(localStorage.getItem('exam_duration') || '30');
+        let totalSeconds = currentDuration * 60;
         const timerElement = document.getElementById('timer');
         
         const timerInterval = setInterval(() => {
@@ -303,48 +375,65 @@
             event.preventDefault();
             clearInterval(timerInterval);
 
-            const qcmVal = document.querySelector('input[name="answer_1_1"]:checked');
-            if (!qcmVal) {
-                alert("Please answer all sub-questions before submitting.");
+            const answers = {};
+            const autoResults = {};
+            let autoGrade = 0;
+            let totalPossiblePoints = 0;
+
+            let unanswered = false;
+
+            questions.forEach((q, qIndex) => {
+                q.sub_questions.forEach((sub, sIndex) => {
+                    const keyName = `answer_${qIndex}_${sIndex}`;
+                    totalPossiblePoints += sub.points;
+
+                    if (sub.type === 'qcm') {
+                        const checkedRadio = document.querySelector(`input[name="${keyName}"]:checked`);
+                        if (!checkedRadio) {
+                            unanswered = true;
+                            return;
+                        }
+                        const ansVal = checkedRadio.value;
+                        answers[keyName] = ansVal;
+
+                        const correct = ansVal === sub.correct;
+                        const earned = correct ? sub.points : 0;
+                        autoResults[keyName] = { correct: correct, earned: earned };
+                        autoGrade += earned;
+                    } else {
+                        const txtVal = document.getElementById(keyName).value;
+                        answers[keyName] = txtVal;
+
+                        const cleanAns = txtVal.toLowerCase().trim();
+                        const expected = sub.correct.toLowerCase().trim();
+                        const correct = cleanAns.includes(expected);
+                        const earned = correct ? sub.points : 0;
+                        autoResults[keyName] = { correct: correct, earned: earned };
+                        autoGrade += earned;
+                    }
+                });
+            });
+
+            if (unanswered) {
+                alert("Please answer all questions before submitting.");
                 return;
             }
 
-            const answers = {
-                answer_1_1: qcmVal.value,
-                answer_1_2: document.getElementById('answer_1_2').value
-            };
+            let finalAutoGrade = totalPossiblePoints > 0 ? (autoGrade / totalPossiblePoints) * 20 : 0;
+            finalAutoGrade = Math.round(finalAutoGrade * 100) / 100;
 
-            // Grade Auto check logic (equivalent to WebTest.py auto results)
-            let qcmCorrect = qcmVal.value === 'B';
-            let qcmEarned = qcmCorrect ? 5.0 : 0.0;
-            
-            // Text answer check (simple case insensitive matches for mockup)
-            let textAns = document.getElementById('answer_1_2').value.toLowerCase();
-            let textCorrect = textAns.includes('distance') || textAns.includes('speed') || textAns.includes('time');
-            let textEarned = textCorrect ? 15.0 : 0.0;
-
-            const autoResults = {
-                answer_1_1: { correct: qcmCorrect, earned: qcmEarned },
-                answer_1_2: { correct: textCorrect, earned: textEarned }
-            };
-
-            const autoGrade = qcmEarned + textEarned; // out of 20
-
-            // Save submission to localStorage
             const submissions = JSON.parse(localStorage.getItem('submissions_' + studentId) || '{}');
             submissions[activeSubject] = {
                 answers: answers,
                 auto_results: autoResults,
-                grade: autoGrade,
+                grade: finalAutoGrade,
                 submitted_at: new Date().toISOString()
             };
             localStorage.setItem('submissions_' + studentId, JSON.stringify(submissions));
 
-            // Set state to submitted
             localStorage.setItem('exam_status_' + studentId, 'submitted');
-            localStorage.setItem('exam_started', 'false'); // reset simulation active exam state
+            localStorage.setItem('exam_started', 'false');
 
-            // Redirect to submitted
             window.location.href = "exam_submitted.html";
         }
     </script>

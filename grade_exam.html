@@ -67,6 +67,7 @@
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 24px;
+            text-align: left;
         }
         .card-header {
             font-size: 1rem;
@@ -263,51 +264,49 @@
             document.getElementById('metaTotal').innerText = student.total;
         }
 
+        // Fetch exam questions
+        const questionsKey = 'questions_' + subject;
+        const questions = JSON.parse(localStorage.getItem(questionsKey) || '[]');
+
         // Fetch submission answers
         const submissions = JSON.parse(localStorage.getItem('submissions_' + studentId) || '{}');
         const examSub = submissions[subject];
 
         if (examSub) {
-            // Load grade and feedback comments if pre-existing
             document.getElementById('finalGrade').value = examSub.grade !== undefined ? examSub.grade : '';
             document.getElementById('teacherComments').value = examSub.teacher_comments || '';
 
-            // Render questions list
+            // Render questions dynamically
             const container = document.getElementById('questionsContainer');
-            
-            // Sub-question 1 details
-            const subQ1 = examSub.answers.answer_1_1 || '[No answer]';
-            const autoQ1 = examSub.auto_results.answer_1_1;
-            const card1 = `
-                <div class="answer-card">
-                    <div class="card-header">(a) What is the SI unit of acceleration? (Points: 5)</div>
-                    <div class="text-label">Student Answer:</div>
-                    <div class="student-response">${subQ1}</div>
-                    <div class="expected-answer">Expected Answer: <strong>B</strong></div>
-                    <div class="auto-result">
-                        <span>Auto-grader check:</span>
-                        <span class="${autoQ1.correct ? 'badge-correct' : 'badge-incorrect'}">${autoQ1.correct ? 'Correct' : 'Incorrect'} (${autoQ1.earned}/5.0 points)</span>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '';
 
-            // Sub-question 2 details
-            const subQ2 = examSub.answers.answer_1_2 || '[No answer]';
-            const autoQ2 = examSub.auto_results.answer_1_2;
-            const card2 = `
-                <div class="answer-card">
-                    <div class="card-header">(b) Define speed in your own words. (Points: 15)</div>
-                    <div class="text-label">Student Answer:</div>
-                    <div class="student-response">${subQ2}</div>
-                    <div class="expected-answer">Expected Answer: <strong>distance over time</strong></div>
-                    <div class="auto-result">
-                        <span>Auto-grader check:</span>
-                        <span class="${autoQ2.correct ? 'badge-correct' : 'badge-incorrect'}">${autoQ2.correct ? 'Correct (Estimated)' : 'Incorrect'} (${autoQ2.earned}/15.0 points)</span>
-                    </div>
-                </div>
-            `;
+            questions.forEach((q, qIndex) => {
+                q.sub_questions.forEach((sub, sIndex) => {
+                    const keyName = `answer_${qIndex}_${sIndex}`;
+                    const studentAns = examSub.answers[keyName] || '[No answer]';
+                    const autoRes = examSub.auto_results[keyName] || { correct: false, earned: 0 };
 
-            container.innerHTML = card1 + card2;
+                    const card = document.createElement('div');
+                    card.className = 'answer-card';
+
+                    let typeLabel = sub.type === 'qcm' ? 'QCM' : 'Text Answer';
+                    let expectedDisplay = sub.type === 'qcm' ? `Choice <strong>${sub.correct}</strong>` : `"${sub.correct}"`;
+
+                    card.innerHTML = `
+                        <div class="card-header">Question ${qIndex + 1}(${String.fromCharCode(97 + sIndex)}): ${sub.prompt} (${typeLabel} - Points: ${sub.points})</div>
+                        <div class="text-label">Student Answer:</div>
+                        <div class="student-response">${studentAns}</div>
+                        <div class="expected-answer">Expected Answer: ${expectedDisplay}</div>
+                        <div class="auto-result">
+                            <span>Auto-grader check:</span>
+                            <span class="${autoRes.correct ? 'badge-correct' : 'badge-incorrect'}">${autoRes.correct ? 'Correct' : 'Incorrect'} (${autoRes.earned}/${sub.points} points)</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        } else {
+            alert("No submission data found for this exam.");
         }
 
         function submitGrades(event) {
@@ -321,17 +320,12 @@
                 return;
             }
 
-            // Update submission in localStorage
             if (examSub) {
                 examSub.grade = finalScore;
                 examSub.teacher_comments = comments;
-                examSub.manual_graded = true; // Mark as manually graded
+                examSub.manual_graded = true;
                 submissions[subject] = examSub;
                 localStorage.setItem('submissions_' + studentId, JSON.stringify(submissions));
-                
-                // Update student status inside student registration
-                // Teacher grading doesn't accept them immediately, but sets status if needed.
-                // We will leave decision to admin, as per standard process.
             }
 
             alert("Evaluation saved successfully!");
