@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Acceptance Test Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d1f3c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 50px 40px;
+            backdrop-filter: blur(20px);
+            text-align: center;
+        }
+        .status-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        h1 {
+            color: #fff;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .status-text {
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(139, 213, 255, 0.2);
+            border-top: 3px solid rgba(139, 213, 255, 0.6);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .info-section {
+            background: rgba(139, 213, 255, 0.08);
+            border: 1px solid rgba(139, 213, 255, 0.2);
+            border-radius: 14px;
+            padding: 20px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+        .info-title {
+            color: rgba(139, 213, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .info-item {
+            text-align: left;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            color: rgba(139, 213, 255, 0.6);
+            font-weight: 500;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .info-value {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .dots {
+            display: inline-block;
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .simulation-bar {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+        }
+        .simulation-title {
+            color: #fcd34d;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .sim-btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sim-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .sim-accept {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            color: #4ade80;
+        }
+        .sim-accept:hover { background: rgba(74, 222, 128, 0.3); }
+        .sim-reject {
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+        .sim-reject:hover { background: rgba(248, 113, 113, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status-icon" id="statusIcon">⏳</div>
+        <h1 id="statusTitle">Waiting Room</h1>
+        <p class="status-text" id="statusLabel">
+            Your admission evaluation is pending...
+        </p>
+        
+        <!-- Status Card (Accepted / Rejected notification) -->
+        <div id="statusCardContainer" style="display: none;"></div>
+        
+        <div class="loading-spinner" id="spinner"></div>
+        
+        <div class="info-section">
+            <div class="info-title">Your Information</div>
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">Name</div>
+                    <div class="info-value" id="dispName">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age</div>
+                    <div class="info-value" id="dispAge">--</div>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">School</div>
+                    <div class="info-value" id="dispSchool">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">School Type</div>
+                    <div class="info-value" id="dispSchoolType">--</div>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="info-label">Note Régional 4ème</div>
+                    <div class="info-value" id="dispRegional">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Note 4ème Totale</div>
+                    <div class="info-value" id="dispTotal">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: rgba(100, 200, 255, 0.08); border: 1px solid rgba(100, 200, 255, 0.2); border-radius: 10px; padding: 16px; margin: 20px 0; text-align: center;">
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; margin: 0;">
+                Status: <strong id="statusBoxVal" style="color: rgba(139, 213, 255, 0.9);">Waiting</strong>
+            </p>
+        </div>
+        
+        <div class="buttons">
+            <a href="index.html" class="btn">← Back Home</a>
+        </div>
+
+        <div class="simulation-bar">
+            <div class="simulation-title">⚡ Simulation Controls (Mock Admin Decision)</div>
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px;">Toggle student status decision to test the dashboard cards:</p>
+            <div class="sim-btn-group">
+                <button onclick="setSimStatus('accepted')" class="sim-btn sim-accept">Set Accepted</button>
+                <button onclick="setSimStatus('rejected')" class="sim-btn sim-reject">Set Rejected</button>
+                <button onclick="setSimStatus('pending')" class="sim-btn">Reset to Pending</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const studentId = localStorage.getItem('current_student_id');
+        if (!studentId) {
+            alert("No student session found. Redirecting to registration.");
+            window.location.href = "student_register.html";
+        }
+
+        function loadDashboard() {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students.find(s => s.student_id === studentId);
+
+            if (!student) {
+                alert("Student data not found.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById('dispName').innerText = student.name;
+            document.getElementById('dispAge').innerText = student.age;
+            document.getElementById('dispSchool').innerText = student.school;
+            document.getElementById('dispSchoolType').innerText = student.school_type;
+            document.getElementById('dispRegional').innerText = student.regional;
+            document.getElementById('dispTotal').innerText = student.total;
+
+            const status = student.status || "pending";
+            const statusCardContainer = document.getElementById('statusCardContainer');
+
+            if (status === 'accepted') {
+                document.getElementById('statusIcon').innerText = "🎓";
+                document.getElementById('statusTitle').innerText = "Admission Evaluation";
+                document.getElementById('statusLabel').innerText = "Your admission evaluation is complete.";
+                document.getElementById('statusBoxVal').innerText = "Finished";
+                document.getElementById('statusBoxVal').style.color = "#4ade80";
+                document.getElementById('spinner').style.display = 'none';
+
+                statusCardContainer.style.display = 'block';
+                statusCardContainer.innerHTML = `
+                    <div style="background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 18px; padding: 24px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+                        <h2 style="color: #4ade80; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Congratulations!</h2>
+                        <p style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; line-height: 1.5; margin: 0;">We are pleased to inform you that you have been <strong>ACCEPTED</strong> into the school. You will receive further information about registration and orientation soon.</p>
+                    </div>
+                `;
+            } else if (status === 'rejected') {
+                document.getElementById('statusIcon').innerText = "🎓";
+                document.getElementById('statusTitle').innerText = "Admission Evaluation";
+                document.getElementById('statusLabel').innerText = "Your admission evaluation is complete.";
+                document.getElementById('statusBoxVal').innerText = "Finished";
+                document.getElementById('statusBoxVal').style.color = "#f87171";
+                document.getElementById('spinner').style.display = 'none';
+
+                statusCardContainer.style.display = 'block';
+                statusCardContainer.innerHTML = `
+                    <div style="background: rgba(255, 107, 107, 0.12); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 18px; padding: 24px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.15);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">✉️</div>
+                        <h2 style="color: #f87171; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Admission Status</h2>
+                        <p style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; line-height: 1.5; margin: 0;">Thank you for your interest in our school. After careful consideration of your exam performance and registration details, we regret to inform you that we are unable to offer you admission at this time. We wish you the best in your future academic pursuits.</p>
+                    </div>
+                `;
+            } else {
+                // Pending
+                document.getElementById('statusIcon').innerText = "⏳";
+                document.getElementById('statusTitle').innerText = "Waiting Room";
+                document.getElementById('statusLabel').innerText = "Your admission evaluation is pending...";
+                document.getElementById('statusBoxVal').innerText = "Waiting";
+                document.getElementById('statusBoxVal').style.color = "rgba(139, 213, 255, 0.9)";
+                document.getElementById('spinner').style.display = 'block';
+                statusCardContainer.style.display = 'none';
+            }
+        }
+
+        function setSimStatus(newStatus) {
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            const studentIdx = students.findIndex(s => s.student_id === studentId);
+            if (studentIdx !== -1) {
+                students[studentIdx].status = newStatus;
+                localStorage.setItem('students', JSON.stringify(students));
+                loadDashboard();
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

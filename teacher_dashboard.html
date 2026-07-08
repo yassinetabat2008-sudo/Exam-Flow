@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Acceptance Test Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d1f3c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 50px 40px;
+            backdrop-filter: blur(20px);
+        }
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .action-card {
+            padding: 32px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.06);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            backdrop-filter: blur(10px);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+        .action-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+        }
+        .action-icon {
+            font-size: 2.5rem;
+        }
+        .action-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .action-desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+        }
+        .duration-card {
+            border-color: rgba(255, 193, 7, 0.28);
+            background: rgba(255, 193, 7, 0.07);
+        }
+        .duration-title {
+            color: rgba(255, 226, 138, 0.95);
+            cursor: pointer;
+        }
+        .duration-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.9rem;
+        }
+        .duration-row input {
+            width: 88px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .duration-row input:focus {
+            outline: none;
+            border-color: rgba(255, 226, 138, 0.7);
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.12);
+        }
+        .duration-save {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 193, 7, 0.32);
+            background: rgba(255, 193, 7, 0.16);
+            color: rgba(255, 235, 178, 0.95);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .duration-save:hover {
+            background: rgba(255, 193, 7, 0.24);
+            border-color: rgba(255, 193, 7, 0.45);
+        }
+        .portal-message {
+            margin: -18px 0 24px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .portal-message.success {
+            background: rgba(76, 175, 80, 0.12);
+            border: 1px solid rgba(76, 175, 80, 0.28);
+            color: rgba(123, 236, 139, 0.95);
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👩‍🏫 Teacher Portal</h1>
+            <p class="subtitle">Select an action to continue</p>
+        </div>
+        
+        <div id="saveMsg" class="portal-message success" style="display: none;">Exam time saved for all tests.</div>
+        
+        <div class="actions-grid">
+            <div onclick="alert('Static Mode: Question creation is simulated. Pre-populated physics questions are available in the exam.')" class="action-card">
+                <div class="action-icon">⚛️</div>
+                <div class="action-title">Physics Exams</div>
+                <div class="action-desc">Create and publish physics questions</div>
+            </div>
+            
+            <div onclick="alert('Static Mode: Question creation is simulated.')" class="action-card">
+                <div class="action-icon">📐</div>
+                <div class="action-title">Math Exams</div>
+                <div class="action-desc">Create and publish math questions</div>
+            </div>
+            
+            <a href="correct_exams.html" class="action-card">
+                <div class="action-icon">✅</div>
+                <div class="action-title">Correct Exams</div>
+                <div class="action-desc">Review answers and save grades</div>
+            </a>
+
+            <!-- Start / Stop Exam Card -->
+            <div id="examActionCard" class="action-card" onclick="toggleExam()">
+                <div class="action-icon" id="examActionIcon">🚀</div>
+                <div class="action-title" id="examActionTitle" style="color: #8bd5ff;">Start Exam</div>
+                <div class="action-desc" id="examActionDesc">Choose and begin the admission test</div>
+            </div>
+
+            <!-- Duration card -->
+            <div class="action-card duration-card">
+                <div class="action-icon">⏱️</div>
+                <div class="action-title duration-title">Exam Time</div>
+                <div class="duration-row">
+                    <input type="number" id="exam_duration" value="30" min="1" max="240">
+                    <span>min</span>
+                </div>
+                <button onclick="saveDuration()" class="duration-save">Save Time</button>
+                <div class="action-desc">Applies to every test started</div>
+            </div>
+        </div>
+        
+        <center>
+            <a href="index.html" class="back-btn">← Back to Role Selection</a>
+            <a href="#" onclick="logout()" class="back-btn" style="margin-left: 12px; background: rgba(255, 107, 107, 0.15); color: rgba(255, 107, 107, 0.9); border-color: rgba(255, 107, 107, 0.25);">🚪 Logout</a>
+        </center>
+    </div>
+
+    <script>
+        // Check login session
+        if (localStorage.getItem('teacher_logged_in') !== 'true') {
+            alert("Session expired. Redirecting to login.");
+            window.location.href = "teacher_login.html";
+        }
+
+        // Load duration settings
+        const currentDuration = localStorage.getItem('exam_duration') || '30';
+        document.getElementById('exam_duration').value = currentDuration;
+
+        function saveDuration() {
+            const minutes = document.getElementById('exam_duration').value;
+            localStorage.setItem('exam_duration', minutes);
+            const msg = document.getElementById('saveMsg');
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 3000);
+        }
+
+        function updateExamCard() {
+            const examStarted = localStorage.getItem('exam_started') === 'true';
+            const activeExam = localStorage.getItem('active_exam');
+            const card = document.getElementById('examActionCard');
+            const icon = document.getElementById('examActionIcon');
+            const title = document.getElementById('examActionTitle');
+            const desc = document.getElementById('examActionDesc');
+
+            if (examStarted) {
+                card.style.borderColor = 'rgba(255, 107, 107, 0.3)';
+                card.style.background = 'rgba(255, 107, 107, 0.08)';
+                icon.innerText = '🛑';
+                title.innerText = 'Stop Exam';
+                title.style.color = '#ff6b6b';
+                desc.innerText = 'Current: ' + activeExam.toUpperCase() + ' exam is in progress';
+            } else {
+                card.style.borderColor = 'rgba(139, 213, 255, 0.3)';
+                card.style.background = 'rgba(139, 213, 255, 0.08)';
+                icon.innerText = '🚀';
+                title.innerText = 'Start Exam';
+                title.style.color = '#8bd5ff';
+                desc.innerText = 'Choose and begin the admission test';
+            }
+        }
+
+        function toggleExam() {
+            const examStarted = localStorage.getItem('exam_started') === 'true';
+            if (examStarted) {
+                // Stop exam
+                localStorage.setItem('exam_started', 'false');
+                updateExamCard();
+                alert("Exam Stopped.");
+            } else {
+                // Start exam
+                const choice = confirm("Launch Physics Exam? (Cancel to launch Math)");
+                const subject = choice ? 'physics' : 'math';
+                localStorage.setItem('active_exam', subject);
+                localStorage.setItem('exam_started', 'true');
+                updateExamCard();
+                alert(subject.toUpperCase() + " Exam launched successfully!");
+            }
+        }
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('teacher_logged_in');
+                window.location.href = "index.html";
+            }
+        }
+
+        updateExamCard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correct Exams - Acceptance Test Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d1f3c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            max-width: 900px;
+            width: 100%;
+            padding: 50px 40px;
+            backdrop-filter: blur(20px);
+        }
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+        }
+        th {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.25);
+        }
+        .badge-graded {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(76, 175, 80, 0.25);
+        }
+        .action-link {
+            background: rgba(139, 213, 255, 0.15);
+            color: #8bd5ff;
+            border: 1px solid rgba(139, 213, 255, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .action-link:hover {
+            background: rgba(139, 213, 255, 0.3);
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Exams Correction</h1>
+        <p class="subtitle">Review student answers and save final grades</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Submitted At</th>
+                    <th>Auto Grade</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="submissionsTableBody">
+                <!-- Submissions injected here -->
+            </tbody>
+        </table>
+        
+        <center>
+            <a href="teacher_dashboard.html" class="back-btn">← Back to Portal</a>
+        </center>
+    </div>
+
+    <script>
+        // Check teacher login session
+        if (localStorage.getItem('teacher_logged_in') !== 'true') {
+            alert("Session expired.");
+            window.location.href = "teacher_login.html";
+        }
+
+        // Mock Submissions Bootstrap if nothing exists
+        function bootstrapMockSubmissions() {
+            // Check if there is any student in students list
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            if (students.length === 0) {
+                // Register a mock student
+                const mockStudent = {
+                    student_id: "std_mock",
+                    name: "Adil Test",
+                    age: "16",
+                    phone: "+212 666 666 666",
+                    gender: "Male",
+                    province: "Rabat",
+                    school: "High School",
+                    school_type: "Public",
+                    regional: "16.50",
+                    total: "17.00",
+                    status: "pending"
+                };
+                students.push(mockStudent);
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                // Add mock physics submission
+                const mockSubmission = {
+                    physics: {
+                        answers: {
+                            answer_1_1: "B",
+                            answer_1_2: "speed is the rate of change of distance with respect to time"
+                        },
+                        auto_results: {
+                            answer_1_1: { correct: true, earned: 5.0 },
+                            answer_1_2: { correct: true, earned: 15.0 }
+                        },
+                        grade: 20.0,
+                        submitted_at: new Date().toISOString()
+                    }
+                };
+                localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
+                localStorage.setItem('exam_status_std_mock', 'submitted');
+            }
+        }
+
+        bootstrapMockSubmissions();
+
+        function renderSubmissions() {
+            const tableBody = document.getElementById('submissionsTableBody');
+            tableBody.innerHTML = '';
+            
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            let count = 0;
+
+            students.forEach(student => {
+                const subKey = 'submissions_' + student.student_id;
+                const submissions = JSON.parse(localStorage.getItem(subKey) || '{}');
+
+                for (let subject in submissions) {
+                    count++;
+                    const subData = submissions[subject];
+                    const tr = document.createElement('tr');
+                    
+                    const isGraded = subData.manual_graded === true || subData.teacher_comments !== undefined;
+                    const statusBadge = isGraded 
+                        ? `<span class="badge badge-graded">Graded (${subData.grade}/20)</span>`
+                        : `<span class="badge badge-pending">Pending Correction</span>`;
+
+                    const dateStr = subData.submitted_at ? subData.submitted_at.substring(0, 16).replace('T', ' ') : '--';
+                    
+                    tr.innerHTML = `
+                        <td><strong>${student.name}</strong></td>
+                        <td>${subject.toUpperCase()}</td>
+                        <td>${dateStr}</td>
+                        <td>${subData.auto_grade || subData.grade || '--'} / 20</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <a href="grade_exam.html?student_id=${student.student_id}&subject=${subject}" class="action-link">
+                                ${isGraded ? 'Review / Edit' : 'Correct Exam'}
+                            </a>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                }
+            });
+
+            if (count === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:rgba(255,255,255,0.4);">No exam submissions found.</td></tr>`;
+            }
+        }
+
+        renderSubmissions();
+    </script>
+</body>
+</html>

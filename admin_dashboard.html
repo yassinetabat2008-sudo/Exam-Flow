@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Acceptance Test Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d1f3c 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 0.95rem;
+        }
+        .filters-panel {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .filter-group label {
+            font-size: 0.85rem;
+            color: rgba(139, 213, 255, 0.8);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .filter-group select {
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            min-width: 160px;
+        }
+        .filter-group select option {
+            background: #0f172a;
+            color: #fff;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-apply {
+            background: rgba(139, 213, 255, 0.18);
+            color: #8bd5ff;
+            border: 1px solid rgba(139, 213, 255, 0.3);
+        }
+        .btn-apply:hover {
+            background: rgba(139, 213, 255, 0.28);
+        }
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .btn-excel {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .btn-excel:hover {
+            background: rgba(76, 175, 80, 0.3);
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+        th {
+            background: rgba(139, 213, 255, 0.1);
+            color: rgba(139, 213, 255, 0.9);
+            font-weight: 600;
+            border-bottom: 2px solid rgba(139, 213, 255, 0.2);
+        }
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .action-accept {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .action-accept:hover { background: rgba(76, 175, 80, 0.35); }
+        .action-reject {
+            background: rgba(255, 107, 107, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .action-reject:hover { background: rgba(255, 107, 107, 0.35); }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-accepted {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .status-rejected {
+            background: rgba(255, 107, 107, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        .status-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        .btn-pdf {
+            background: rgba(14, 165, 233, 0.15);
+            color: #0ea5e9;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 2px;
+        }
+        .btn-pdf:hover {
+            background: rgba(14, 165, 233, 0.28);
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Admin Dashboard</h1>
+        <p class="subtitle">Evaluate candidates and make registration decisions</p>
+        
+        <!-- Filters panel -->
+        <div class="filters-panel">
+            <div class="filter-group">
+                <label for="genderFilter">Gender</label>
+                <select id="genderFilter">
+                    <option value="all">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="schoolFilter">School Type</label>
+                <select id="schoolFilter">
+                    <option value="all">All School Types</option>
+                    <option value="Privée">Privée</option>
+                    <option value="Public">Public</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sortOrder">Grades Sort</label>
+                <select id="sortOrder">
+                    <option value="desc">Highest to lowest</option>
+                    <option value="asc">Lowest to highest</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button onclick="applyFilters()" class="btn btn-apply">Apply Filters</button>
+                <button onclick="resetFilters()" class="btn btn-reset">Reset</button>
+                <button onclick="exportToExcel()" class="btn btn-excel">📊 Export Excel</button>
+            </div>
+        </div>
+
+        <!-- Candidates Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Province</th>
+                        <th>School</th>
+                        <th>Type</th>
+                        <th>Note Reg</th>
+                        <th>Note Total</th>
+                        <th>Phone</th>
+                        <th>Physics Grade</th>
+                        <th>Math Grade</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <!-- Dynamic rendering -->
+                </tbody>
+            </table>
+        </div>
+        
+        <center>
+            <a href="index.html" class="back-btn">← Back to Portal</a>
+            <button onclick="logout()" class="back-btn" style="margin-left: 12px; background: rgba(255, 107, 107, 0.15); color: rgba(255, 107, 107, 0.9); border-color: rgba(255, 107, 107, 0.25);">🚪 Logout</button>
+        </center>
+    </div>
+
+    <script>
+        // Check admin login session
+        if (localStorage.getItem('admin_logged_in') !== 'true') {
+            alert("Session expired.");
+            window.location.href = "admin_login.html";
+        }
+
+        // Mock Submissions Bootstrap if nothing exists
+        function bootstrapMockSubmissions() {
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            if (students.length === 0) {
+                const mockStudent = {
+                    student_id: "std_mock",
+                    name: "Adil Test",
+                    age: "16",
+                    phone: "+212 666 666 666",
+                    gender: "Male",
+                    province: "Rabat",
+                    school: "High School",
+                    school_type: "Public",
+                    regional: "16.50",
+                    total: "17.00",
+                    status: "pending"
+                };
+                students.push(mockStudent);
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                const mockSubmission = {
+                    physics: {
+                        answers: { answer_1_1: "B", answer_1_2: "speed is distance over time" },
+                        auto_results: { answer_1_1: { correct: true, earned: 5.0 }, answer_1_2: { correct: true, earned: 15.0 } },
+                        grade: 20.0,
+                        submitted_at: new Date().toISOString()
+                    }
+                };
+                localStorage.setItem('submissions_std_mock', JSON.stringify(mockSubmission));
+            }
+        }
+
+        bootstrapMockSubmissions();
+
+        function renderCandidates() {
+            const tableBody = document.getElementById('candidatesTableBody');
+            tableBody.innerHTML = '';
+
+            const genderVal = document.getElementById('genderFilter').value;
+            const schoolVal = document.getElementById('schoolFilter').value;
+            const sortVal = document.getElementById('sortOrder').value;
+
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+
+            // Filter students
+            let filtered = students.filter(student => {
+                const matchGender = genderVal === 'all' || student.gender === genderVal;
+                const matchSchool = schoolVal === 'all' || student.school_type === schoolVal;
+                return matchGender && matchSchool;
+            });
+
+            // Sort students by total score
+            filtered.sort((a, b) => {
+                const valA = parseFloat(a.total || 0);
+                const valB = parseFloat(b.total || 0);
+                return sortVal === 'desc' ? valB - valA : valA - valB;
+            });
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:rgba(255,255,255,0.4);">No candidates match the filter criteria.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach((student, index) => {
+                const subKey = 'submissions_' + student.student_id;
+                const submissions = JSON.parse(localStorage.getItem(subKey) || '{}');
+
+                const physicsGrade = submissions.physics ? submissions.physics.grade : null;
+                const mathGrade = submissions.math ? submissions.math.grade : null;
+
+                const tr = document.createElement('tr');
+                
+                // Status Badge
+                let badgeClass = 'status-pending';
+                let statusText = 'Pending';
+                if (student.status === 'accepted') {
+                    badgeClass = 'status-accepted';
+                    statusText = 'Accepted';
+                } else if (student.status === 'rejected') {
+                    badgeClass = 'status-rejected';
+                    statusText = 'Rejected';
+                }
+
+                const statusBadge = `<span class="status-badge ${badgeClass}">${statusText}</span>`;
+
+                // Actions buttons
+                const actionsHtml = `
+                    <button onclick="decideStudent('${student.student_id}', 'accepted')" class="action-accept">Accept</button>
+                    <button onclick="decideStudent('${student.student_id}', 'rejected')" class="action-reject" style="margin-left:5px;">Reject</button>
+                `;
+
+                // PDF report mocks
+                let pdfLinks = '';
+                if (physicsGrade !== null) {
+                    pdfLinks += `<a href="#" onclick="mockDownloadPdf('${student.student_id}', 'physics')" class="btn-pdf">Physics PDF</a>`;
+                }
+                if (mathGrade !== null) {
+                    pdfLinks += `<a href="#" onclick="mockDownloadPdf('${student.student_id}', 'math')" class="btn-pdf">Math PDF</a>`;
+                }
+
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #8bd5ff;">#${index + 1}</td>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.age}</td>
+                    <td>${student.gender}</td>
+                    <td>${student.province}</td>
+                    <td>${student.school}</td>
+                    <td>${student.school_type}</td>
+                    <td>${student.regional}</td>
+                    <td style="font-weight:bold; color:#8bd5ff;">${student.total}</td>
+                    <td>${student.phone}</td>
+                    <td style="text-align:center;">${physicsGrade !== null ? physicsGrade + '/20' : '<span style="color:rgba(255,255,255,0.3);">--</span>'}</td>
+                    <td style="text-align:center;">${mathGrade !== null ? mathGrade + '/20' : '<span style="color:rgba(255,255,255,0.3);">--</span>'}</td>
+                    <td style="text-align:center;">${statusBadge}</td>
+                    <td style="text-align:center;">
+                        <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                            <div>${actionsHtml}</div>
+                            <div>${pdfLinks}</div>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function decideStudent(studentId, decision) {
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            const idx = students.findIndex(s => s.student_id === studentId);
+            if (idx !== -1) {
+                students[idx].status = decision;
+                localStorage.setItem('students', JSON.stringify(students));
+                renderCandidates();
+                alert(`Student application has been ${decision}!`);
+            }
+        }
+
+        function mockDownloadPdf(studentId, subject) {
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students.find(s => s.student_id === studentId);
+            const submissions = JSON.parse(localStorage.getItem('submissions_' + studentId) || '{}');
+            const sub = submissions[subject];
+
+            if (!student || !sub) {
+                alert("Submission data not found.");
+                return;
+            }
+
+            // Generate a simple plain text report as a mockup file download!
+            const textContent = `
+========================================
+EXAM EVALUATION REPORT - ${subject.toUpperCase()}
+========================================
+Student Name: ${student.name}
+School Type:  ${student.school_type}
+Regional:     ${student.regional}
+Total:        ${student.total}
+========================================
+GRADE:        ${sub.grade} / 20
+Teacher Comments: "${sub.teacher_comments || 'No comments'}"
+========================================
+`;
+
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${student.name.replace(/\s+/g, '_')}_${subject}_corrected_report.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function applyFilters() {
+            renderCandidates();
+        }
+
+        function resetFilters() {
+            document.getElementById('genderFilter').value = 'all';
+            document.getElementById('schoolFilter').value = 'all';
+            document.getElementById('sortOrder').value = 'desc';
+            renderCandidates();
+        }
+
+        function exportToExcel() {
+            let students = JSON.parse(localStorage.getItem('students') || '[]');
+            let csvContent = "data:text/csv;charset=utf-8,Name,Age,Gender,School,Type,Regional,Total,Status\n";
+            students.forEach(s => {
+                csvContent += `"${s.name}",${s.age},${s.gender},"${s.school}",${s.school_type},${s.regional},${s.total},${s.status}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const a = document.createElement('a');
+            a.href = encodedUri;
+            a.download = "acceptance_candidates_results.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('admin_logged_in');
+                window.location.href = "index.html";
+            }
+        }
+
+        renderCandidates();
+    </script>
+</body>
+</html>

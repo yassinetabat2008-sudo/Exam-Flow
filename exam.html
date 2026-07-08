@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptance Exam - Acceptance Test Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d1f3c 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #fff;
+        }
+        .header-bar {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto 24px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 16px 24px;
+            backdrop-filter: blur(20px);
+        }
+        .student-info {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+        }
+        .timer-box {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            backdrop-filter: blur(20px);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+            color: #fff;
+        }
+        .question-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+        .question-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: rgba(139, 213, 255, 0.9);
+            margin-bottom: 10px;
+        }
+        .question-body {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.85);
+        }
+        .diagram-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0 25px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .sub-question {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .sub-question-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+        .choices-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .choice-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .choice-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(139, 213, 255, 0.3);
+        }
+        .choice-option.selected {
+            background: rgba(139, 213, 255, 0.15);
+            border-color: rgba(139, 213, 255, 0.5);
+        }
+        .choice-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #8bd5ff;
+            cursor: pointer;
+        }
+        .choice-label {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: rgba(139, 213, 255, 0.4);
+            background: rgba(139, 213, 255, 0.08);
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        .btn-submit {
+            padding: 14px 32px;
+            background: rgba(76, 175, 80, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(76, 175, 80, 0.4);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-submit:hover {
+            background: rgba(76, 175, 80, 0.35);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <div class="student-info">
+            Student: <strong id="studentName">Adil Test</strong> (ID: <span id="studentIdDisplay">--</span>)
+        </div>
+        <div class="timer-box">
+            ⏱️ <span id="timer">30:00</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <h1 id="examTitle">Physics Entrance Examination</h1>
+        
+        <form id="examForm" onsubmit="submitExam(event)">
+            <!-- Question 1 Card -->
+            <div class="question-card">
+                <div class="question-header">Question 1: Kinematics & Dynamics</div>
+                <div class="question-body">
+                    A particle is moving along a straight coordinate line. Its position vector relative to the origin satisfies the constant acceleration equation. Study the diagram below representing the motion and answer the sub-questions.
+                </div>
+                
+                <!-- Diagram Visual (Inline SVG) -->
+                <div class="diagram-container">
+                    <svg width="400" height="120" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Coordinate Line -->
+                        <line x1="20" y1="70" x2="380" y2="70" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4" />
+                        <polygon points="380,66 390,70 380,74" fill="#cbd5e1" />
+                        <!-- Origin -->
+                        <line x1="80" y1="65" x2="80" y2="75" stroke="#8bd5ff" stroke-width="3" />
+                        <text x="75" y="90" fill="#8bd5ff" font-size="12" font-family="sans-serif">O (0)</text>
+                        <!-- Particle Vector / Arrow -->
+                        <circle cx="220" cy="70" r="8" fill="#4ade80" />
+                        <line x1="220" y1="70" x2="300" y2="70" stroke="#4ade80" stroke-width="3" />
+                        <polygon points="300,65 310,70 300,75" fill="#4ade80" />
+                        <text x="210" y="55" fill="#4ade80" font-size="12" font-family="sans-serif" font-weight="bold">v (t)</text>
+                        <text x="280" y="55" fill="#e2e8f0" font-size="12" font-family="sans-serif">a = const</text>
+                    </svg>
+                </div>
+                
+                <!-- Sub Question 1 (QCM) -->
+                <div class="sub-question">
+                    <div class="sub-question-title"><b>(a)</b> What is the SI unit of acceleration? (Points: 5)</div>
+                    <div class="choices-grid">
+                        <div class="choice-option" onclick="selectRadio('choice_1_A')">
+                            <input type="radio" id="choice_1_A" name="answer_1_1" value="A">
+                            <label class="choice-label" for="choice_1_A"><b>A.</b> m/s</label>
+                        </div>
+                        <div class="choice-option" onclick="selectRadio('choice_1_B')">
+                            <input type="radio" id="choice_1_B" name="answer_1_1" value="B">
+                            <label class="choice-label" for="choice_1_B"><b>B.</b> m/s²</label>
+                        </div>
+                        <div class="choice-option" onclick="selectRadio('choice_1_C')">
+                            <input type="radio" id="choice_1_C" name="answer_1_1" value="C">
+                            <label class="choice-label" for="choice_1_C"><b>C.</b> s</label>
+                        </div>
+                        <div class="choice-option" onclick="selectRadio('choice_1_D')">
+                            <input type="radio" id="choice_1_D" name="answer_1_1" value="D">
+                            <label class="choice-label" for="choice_1_D"><b>D.</b> kg</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sub Question 2 (Text) -->
+                <div class="sub-question">
+                    <div class="sub-question-title"><b>(b)</b> Define speed in your own words. (Points: 15)</div>
+                    <textarea id="answer_1_2" placeholder="Write your definition of speed..." required></textarea>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn-submit">Submit Answers</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const studentId = localStorage.getItem('current_student_id');
+        if (!studentId) {
+            alert("No student registered. Redirecting to home.");
+            window.location.href = "index.html";
+        }
+
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        const student = students.find(s => s.student_id === studentId);
+        if (student) {
+            document.getElementById('studentName').innerText = student.name;
+            document.getElementById('studentIdDisplay').innerText = studentId;
+        }
+
+        // Active Subject
+        const activeSubject = localStorage.getItem('active_exam') || 'physics';
+        document.getElementById('examTitle').innerText = activeSubject.toUpperCase() + " Entrance Examination";
+
+        // Radio option highlighting helper
+        function selectRadio(id) {
+            document.getElementById(id).checked = true;
+            
+            // Highlight container
+            const radio = document.getElementById(id);
+            const parent = radio.closest('.choices-grid');
+            const options = parent.querySelectorAll('.choice-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            radio.closest('.choice-option').classList.add('selected');
+        }
+
+        // Timer countdown
+        let totalSeconds = 30 * 60;
+        const timerElement = document.getElementById('timer');
+        
+        const timerInterval = setInterval(() => {
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting exam automatically.");
+                document.getElementById('examForm').dispatchEvent(new Event('submit'));
+                return;
+            }
+            totalSeconds--;
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            timerElement.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+
+        // Submit exam answers
+        function submitExam(event) {
+            event.preventDefault();
+            clearInterval(timerInterval);
+
+            const qcmVal = document.querySelector('input[name="answer_1_1"]:checked');
+            if (!qcmVal) {
+                alert("Please answer all sub-questions before submitting.");
+                return;
+            }
+
+            const answers = {
+                answer_1_1: qcmVal.value,
+                answer_1_2: document.getElementById('answer_1_2').value
+            };
+
+            // Grade Auto check logic (equivalent to WebTest.py auto results)
+            let qcmCorrect = qcmVal.value === 'B';
+            let qcmEarned = qcmCorrect ? 5.0 : 0.0;
+            
+            // Text answer check (simple case insensitive matches for mockup)
+            let textAns = document.getElementById('answer_1_2').value.toLowerCase();
+            let textCorrect = textAns.includes('distance') || textAns.includes('speed') || textAns.includes('time');
+            let textEarned = textCorrect ? 15.0 : 0.0;
+
+            const autoResults = {
+                answer_1_1: { correct: qcmCorrect, earned: qcmEarned },
+                answer_1_2: { correct: textCorrect, earned: textEarned }
+            };
+
+            const autoGrade = qcmEarned + textEarned; // out of 20
+
+            // Save submission to localStorage
+            const submissions = JSON.parse(localStorage.getItem('submissions_' + studentId) || '{}');
+            submissions[activeSubject] = {
+                answers: answers,
+                auto_results: autoResults,
+                grade: autoGrade,
+                submitted_at: new Date().toISOString()
+            };
+            localStorage.setItem('submissions_' + studentId, JSON.stringify(submissions));
+
+            // Set state to submitted
+            localStorage.setItem('exam_status_' + studentId, 'submitted');
+            localStorage.setItem('exam_started', 'false'); // reset simulation active exam state
+
+            // Redirect to submitted
+            window.location.href = "exam_submitted.html";
+        }
+    </script>
+</body>
+</html>
